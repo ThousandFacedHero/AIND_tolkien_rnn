@@ -36,11 +36,9 @@ def build_part1_RNN(window_size):
 # given below included.
 def cleaned_text(text):
     punctuation = ['!', ',', '.', ':', ';', '?']
-    allowed = punctuation + [string.ascii_letters] + [string.digits] + [' ']
-    disallowed = [c for c in text if c not in ''.join(allowed)]
-    text = re.sub('[' + re.escape(''.join(set(disallowed))) + ']', '', text)
-    text = ' '.join(text.split()).lower()
-    return text
+    allowed = ''.join(punctuation) + ' ' + string.ascii_letters
+    new_text = [x for x in text if x in allowed]
+    return ''.join(new_text)
 
 
 # fill out the function below that transforms the input text and window-size
@@ -54,7 +52,7 @@ def window_transform_text(text, window_size, step_size):
     return inputs, outputs
 
 
-# TODO build the required RNN model: 
+# build the required RNN model:
 # a single LSTM hidden layer with softmax activation, categorical_crossentropy loss 
 def build_part2_RNN(window_size, num_chars):
     model = Sequential()
