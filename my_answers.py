@@ -1,4 +1,6 @@
 import numpy as np
+import string
+import re
 
 from keras.models import Sequential
 from keras.layers import Dense
@@ -6,41 +8,56 @@ from keras.layers import LSTM
 import keras
 
 
-# TODO: fill out the function below that transforms the input series 
+# function below transforms the input series
 # and window-size into a set of input/output pairs for use with our RNN model
 def window_transform_series(series, window_size):
     # containers for input/output pairs
-    X = []
-    y = []
+    X = [series[x:window_size+x] for x in range(len(series)-window_size)]
+    y = [series[window_size+x] for x in range(len(series)-window_size)]
 
     # reshape each 
     X = np.asarray(X)
     X.shape = (np.shape(X)[0:2])
     y = np.asarray(y)
-    y.shape = (len(y),1)
+    y.shape = (len(y), 1)
 
-    return X,y
+    return X, y
 
-# TODO: build an RNN to perform regression on our time series input/output data
+
+# build an RNN to perform regression on our time series input/output data
 def build_part1_RNN(window_size):
-    pass
+    model = Sequential()
+    model.add(LSTM(5, input_shape=(window_size, 1), name='LSTM_1'))
+    model.add(Dense(1, name='Dense_1'))
+    return model
 
 
-### TODO: return the text input with only ascii lowercase and the punctuation given below included.
+# return the text input with only ascii lowercase and the punctuation
+# given below included.
 def cleaned_text(text):
     punctuation = ['!', ',', '.', ':', ';', '?']
-
+    allowed = punctuation + [string.ascii_letters] + [string.digits] + [' ']
+    disallowed = [c for c in text if c not in ''.join(allowed)]
+    text = re.sub('[' + re.escape(''.join(set(disallowed))) + ']', '', text)
+    text = ' '.join(text.split()).lower()
     return text
 
-### TODO: fill out the function below that transforms the input text and window-size into a set of input/output pairs for use with our RNN model
+
+# fill out the function below that transforms the input text and window-size
+# into a set of input/output pairs for use with our RNN model
 def window_transform_text(text, window_size, step_size):
     # containers for input/output pairs
-    inputs = []
-    outputs = []
+    p = len(text) - window_size
+    inputs = [text[x:window_size+x] for x in range(0, p, step_size)]
+    outputs = [text[window_size+x] for x in range(0, p, step_size)]
 
-    return inputs,outputs
+    return inputs, outputs
+
 
 # TODO build the required RNN model: 
 # a single LSTM hidden layer with softmax activation, categorical_crossentropy loss 
 def build_part2_RNN(window_size, num_chars):
-    pass
+    model = Sequential()
+    model.add(LSTM(200, input_shape=(window_size, num_chars), name='LSTM_hobbit_1'))
+    model.add(Dense(num_chars, activation='softmax', name='Dense_hobbit_1'))
+    return model
